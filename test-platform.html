@@ -1,0 +1,1382 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduQuiz | Online Test Platform</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --bg-2: #101a2b;
+        --panel: rgba(16, 26, 43, 0.96);
+        --panel-soft: rgba(255, 255, 255, 0.03);
+        --primary: #5eead4;
+        --primary-2: #22c55e;
+        --secondary: #8b5cf6;
+        --danger: #ff5d73;
+        --warning: #fbbf24;
+        --text: #ebf7ff;
+        --muted: #a8bad1;
+        --line: rgba(255, 255, 255, 0.08);
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(94, 234, 212, 0.18),
+            transparent 18%
+          ),
+          radial-gradient(
+            circle at right,
+            rgba(139, 92, 246, 0.16),
+            transparent 20%
+          ),
+          linear-gradient(135deg, var(--bg), var(--bg-2));
+      }
+
+      body.logged-out > header,
+      body.logged-out > main {
+        display: none;
+      }
+
+      .login-gate {
+        display: none;
+      }
+
+      body.logged-out .login-gate {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .gate-panel {
+        width: min(440px, 100%);
+        padding: 34px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(16, 26, 43, 0.94);
+        box-shadow: var(--shadow);
+      }
+
+      .gate-panel h1 {
+        margin: 26px 0 10px;
+        font-size: 2rem;
+        letter-spacing: 0;
+      }
+
+      .gate-panel p {
+        margin: 0 0 24px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .gate-form {
+        display: grid;
+        gap: 18px;
+      }
+
+      .gate-error {
+        min-height: 1.2em;
+        color: var(--danger);
+        font-size: 0.9rem;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      .container {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(11, 18, 32, 0.8);
+        backdrop-filter: blur(18px);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 80px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        box-shadow: 0 10px 30px rgba(94, 234, 212, 0.25);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 24px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .nav-links a:hover {
+        color: var(--text);
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      #welcomeName {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--text);
+        padding: 11px 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+      .btn.primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        border: none;
+        color: #06220d;
+        box-shadow: 0 15px 35px rgba(94, 234, 212, 0.28);
+      }
+
+      .hero {
+        padding: 52px 0 40px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 24px;
+        align-items: center;
+      }
+
+      .hero-copy {
+        padding: 24px 0;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(139, 92, 246, 0.12);
+        border: 1px solid rgba(139, 92, 246, 0.28);
+        color: #d9c9ff;
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 800;
+      }
+
+      h1 {
+        margin: 18px 0 16px;
+        font-size: clamp(2.8rem, 5vw, 5.2rem);
+        line-height: 0.96;
+        letter-spacing: -0.06em;
+      }
+
+      .gradient-text {
+        background: linear-gradient(135deg, #fff, #9fe7d2, #b7d4ff, #d6b4ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 1.08rem;
+        line-height: 1.8;
+        max-width: 620px;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+      }
+
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-top: 32px;
+      }
+
+      .stat {
+        min-width: 150px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px 20px;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 1.7rem;
+      }
+      .stat span {
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .hero-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        padding: 22px;
+        box-shadow: var(--shadow);
+      }
+
+      .mini-box {
+        background: linear-gradient(
+          180deg,
+          rgba(94, 234, 212, 0.15),
+          rgba(17, 26, 43, 0.5)
+        );
+        border: 1px solid rgba(94, 234, 212, 0.22);
+        border-radius: 20px;
+        padding: 18px;
+      }
+
+      .mini-box h3 {
+        margin: 0 0 10px;
+        font-size: 1.2rem;
+      }
+
+      .mini-box p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .score-ring {
+        width: 150px;
+        height: 150px;
+        margin: 18px auto;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: rgba(94, 234, 212, 0.08);
+        border: 1px solid rgba(94, 234, 212, 0.22);
+        position: relative;
+      }
+      .score-ring::before {
+        content: "";
+        position: absolute;
+        inset: 16px;
+        background: rgba(11, 18, 32, 0.96);
+        border-radius: 50%;
+      }
+      .score-ring span {
+        position: relative;
+        z-index: 1;
+        font-size: 2rem;
+        font-weight: 800;
+      }
+
+      .section {
+        padding: 20px 0 32px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+
+      .section-head h2 {
+        margin: 0;
+        font-size: clamp(1.8rem, 2vw, 2.5rem);
+      }
+
+      .login-box {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 22px;
+      }
+
+      .panel {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      label {
+        display: grid;
+        gap: 8px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        color: var(--text);
+        padding: 12px 14px;
+        outline: none;
+      }
+
+      .subject-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .subject-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px 16px;
+        cursor: pointer;
+        transition: 0.2s ease;
+        text-align: center;
+      }
+      .subject-card:hover {
+        transform: translateY(-2px);
+      }
+      .subject-card.selected {
+        background: rgba(94, 234, 212, 0.12);
+        border-color: rgba(94, 234, 212, 0.32);
+      }
+
+      .result-box {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .result-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px;
+      }
+      .result-card h3 {
+        margin: 0 0 8px;
+      }
+      .result-card p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .quiz-box {
+        display: none;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        padding: 26px;
+        box-shadow: var(--shadow);
+      }
+      .quiz-box.active {
+        display: block;
+      }
+
+      .question {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        margin-bottom: 18px;
+      }
+      .options {
+        display: grid;
+        gap: 12px;
+        margin-top: 10px;
+      }
+      .option {
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.02);
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+      .option.selected {
+        background: rgba(94, 234, 212, 0.1);
+        border-color: rgba(94, 234, 212, 0.32);
+      }
+
+      .quiz-footer {
+        margin-top: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .leaderboard {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+        gap: 18px;
+      }
+
+      .leader-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 18px;
+      }
+
+      .rank {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--secondary), var(--danger));
+        font-weight: 800;
+      }
+
+      .leader-item h3 {
+        margin: 12px 0 8px;
+      }
+      .leader-item p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .admin-box {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+
+      .admin-form {
+        display: grid;
+        gap: 16px;
+      }
+
+      .textarea {
+        min-height: 110px;
+        resize: vertical;
+      }
+
+      .quiz-error {
+        min-height: 1.2em;
+        color: var(--danger);
+      }
+
+      .leaderboard-empty {
+        color: var(--muted);
+        grid-column: 1 / -1;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 980px) {
+        .hero-grid,
+        .login-box,
+        .admin-box {
+          grid-template-columns: 1fr;
+        }
+        .leaderboard {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .nav-links {
+          display: none;
+        }
+        .nav-actions .btn {
+          padding: 9px 12px;
+        }
+        .subject-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body class="logged-out">
+    <section class="login-gate" aria-label="Tizimga kirish">
+      <form class="gate-panel" id="loginForm">
+        <div class="brand">
+          <div class="brand-mark">E</div>
+          <span>EduQuiz</span>
+        </div>
+        <h1>Xush kelibsiz</h1>
+        <p>Platformaga kirish uchun ismingiz va parolingizni kiriting.</p>
+        <div class="gate-form">
+          <label>
+            Ismingiz
+            <input
+              id="loginName"
+              type="text"
+              autocomplete="username"
+              placeholder="Masalan: Azizbek"
+              required
+            />
+          </label>
+          <label>
+            Parol
+            <input
+              id="loginPassword"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Parolingiz"
+              required
+            />
+          </label>
+          <div class="gate-error" id="loginError" role="alert"></div>
+          <button class="btn primary" type="submit">Kirish</button>
+        </div>
+      </form>
+    </section>
+
+    <header>
+      <div class="container nav">
+        <div class="brand">
+          <div class="brand-mark">E</div>
+          <span>EduQuiz</span>
+        </div>
+
+        <nav class="nav-links">
+          <a href="#login">Login</a>
+          <a href="#tests">Testlar</a>
+          <a href="#leaderboard">Reyting</a>
+          <a href="#admin">Admin</a>
+        </nav>
+
+        <div class="nav-actions">
+          <span id="welcomeName"></span>
+          <button class="btn" id="logoutBtn" type="button">Chiqish</button>
+          <a href="#admin" class="btn primary">Admin panel</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="chip">Onlayn test platformasi</div>
+            <h1>
+              Bilimingni sinab ko'ring,
+              <span class="gradient-text">natijani bir zumda</span> bilib oling.
+            </h1>
+            <p class="lead">
+              O‘quvchi login qilib fan tanlaydi, test ishlaydi, natija avtomatik
+              hisoblanadi va reyting jadvali yangilanadi. Admin esa yangi
+              testlarni qo‘shib borishi mumkin.
+            </p>
+
+            <div class="hero-actions">
+              <a href="#login" class="btn primary">Boshlash</a>
+              <a href="#leaderboard" class="btn">Reyting</a>
+            </div>
+
+            <div class="stats">
+              <div class="stat">
+                <strong>3 ta</strong>
+                <span>fan mavjud</span>
+              </div>
+              <div class="stat">
+                <strong>5 ta</strong>
+                <span>tasodifiy savol</span>
+              </div>
+              <div class="stat">
+                <strong>02:00</strong>
+                <span>test vaqti</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-card">
+            <div class="mini-box">
+              <h3>Yangi savollar</h3>
+              <p>Har urinishda fan bo‘yicha 5 ta savol tasodifiy tanlanadi.</p>
+            </div>
+            <div class="score-ring"><span>5</span></div>
+            <div class="result-box">
+              <div class="result-card">
+                <h3>Fanlar</h3>
+                <p>Ingliz tili, matematika va tarix</p>
+              </div>
+              <div class="result-card">
+                <h3>Natija</h3>
+                <p>Test yakunlangach avtomatik hisoblanadi</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="login">
+        <div class="section-head">
+          <h2>O‘quvchi login</h2>
+        </div>
+
+        <div class="login-box">
+          <div class="panel">
+            <div class="form-grid">
+              <label>
+                Ismingiz
+                <input
+                  type="text"
+                  id="studentName"
+                  placeholder="Masalan: Azizbek"
+                />
+              </label>
+
+              <label>
+                Fan tanlang
+                <select id="subjectSelect">
+                  <option value="">Fanlarni tanlang</option>
+                  <option>Ingliz tili</option>
+                  <option>Matematika</option>
+                  <option>Tarix</option>
+                </select>
+              </label>
+
+              <div id="tests">
+                <div
+                  style="
+                    margin-bottom: 10px;
+                    color: var(--muted);
+                    font-weight: 700;
+                  "
+                >
+                  Tanlangan fanlar
+                </div>
+                <div class="subject-grid">
+                  <div class="subject-card selected" data-subject="Ingliz tili">
+                    Ingliz tili
+                  </div>
+                  <div class="subject-card" data-subject="Matematika">
+                    Matematika
+                  </div>
+                  <div class="subject-card" data-subject="Tarix">Tarix</div>
+                </div>
+              </div>
+
+              <button class="btn primary" id="startTestBtn">
+                Testni boshlash
+              </button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3 style="margin-top: 0">Statistika</h3>
+            <div class="result-card">
+              <h3>Umumiy natija</h3>
+              <p id="summaryText">Hali ishlanmagan</p>
+            </div>
+            <div class="result-card" style="margin-top: 12px">
+              <h3>Reyting</h3>
+              <p id="rankText">Siz hozirda reytingda yo'q</p>
+            </div>
+          </div>
+        </div>
+        <div class="panel hidden" id="resultPanel" style="margin-top: 22px">
+          <h3 id="resultName"></h3>
+          <p id="resultSummary"></p>
+        </div>
+      </section>
+
+      <section class="section hidden" id="quizSection">
+        <div class="quiz-box active">
+          <div class="section-head" style="margin-top: 0; margin-bottom: 12px">
+            <h2 id="quizTitle">Test</h2>
+            <span id="timer" class="chip">02:00</span>
+          </div>
+
+          <div id="questionBlock">
+            <div class="question" id="questionText">Savol yuklanmoqda...</div>
+            <div class="options" id="optionsList"></div>
+            <p class="quiz-error" id="quizError" role="alert"></p>
+          </div>
+
+          <div class="quiz-footer">
+            <div id="progressText">Savol 1/5</div>
+            <button class="btn primary" id="nextBtn">Keyingi savol</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="leaderboard">
+        <div class="section-head">
+          <h2>Reyting jadvali</h2>
+        </div>
+
+        <div class="leaderboard" id="leaderboardList" aria-live="polite"></div>
+      </section>
+
+      <section class="section" id="admin">
+        <div class="section-head">
+          <h2>Admin test qo'shish</h2>
+        </div>
+
+        <div class="admin-box">
+          <div class="panel">
+            <form class="admin-form" id="adminForm">
+              <label>
+                Fan
+                <select id="adminSubject">
+                  <option>Ingliz tili</option>
+                  <option>Matematika</option>
+                  <option>Tarix</option>
+                </select>
+              </label>
+
+              <label>
+                Savol matni
+                <textarea
+                  class="textarea"
+                  id="adminQuestion"
+                  placeholder="Savolni kiriting..."
+                  required
+                ></textarea>
+              </label>
+
+              <label>
+                Variantlar
+                <input
+                  class="answer-option"
+                  type="text"
+                  placeholder="A) variant"
+                  required
+                />
+                <input
+                  class="answer-option"
+                  type="text"
+                  placeholder="B) variant"
+                  required
+                />
+                <input
+                  class="answer-option"
+                  type="text"
+                  placeholder="C) variant"
+                  required
+                />
+                <input
+                  class="answer-option"
+                  type="text"
+                  placeholder="D) variant"
+                  required
+                />
+              </label>
+
+              <label>
+                To'g'ri javob
+                <select id="adminCorrectAnswer">
+                  <option value="0">A</option>
+                  <option value="1">B</option>
+                  <option value="2">C</option>
+                  <option value="3">D</option>
+                </select>
+              </label>
+
+              <button class="btn primary" type="submit">Testni saqlash</button>
+              <p class="quiz-error" id="adminMessage" role="status"></p>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h3 style="margin-top: 0">Yangi testlar</h3>
+            <div class="result-box" id="testBankSummary"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const loginForm = document.getElementById("loginForm");
+      const loginName = document.getElementById("loginName");
+      const loginPassword = document.getElementById("loginPassword");
+      const loginError = document.getElementById("loginError");
+      const welcomeName = document.getElementById("welcomeName");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const studentName = document.getElementById("studentName");
+
+      function enterPlatform(name) {
+        document.body.classList.remove("logged-out");
+        welcomeName.textContent = `Salom, ${name}`;
+        studentName.value = name;
+      }
+
+      loginForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = loginName.value.trim();
+        const password = loginPassword.value;
+
+        if (!name || !password.trim()) {
+          loginError.textContent = "Ism va parolni kiriting.";
+          return;
+        }
+
+        sessionStorage.setItem("eduquizStudent", name);
+        enterPlatform(name);
+        document.getElementById("login").scrollIntoView({ behavior: "smooth" });
+      });
+
+      logoutBtn.addEventListener("click", () => {
+        sessionStorage.removeItem("eduquizStudent");
+        window.location.reload();
+      });
+
+      const subjectCards = document.querySelectorAll(".subject-card");
+      const subjectSelect = document.getElementById("subjectSelect");
+      const startTestBtn = document.getElementById("startTestBtn");
+      const quizSection = document.getElementById("quizSection");
+      const quizTitle = document.getElementById("quizTitle");
+      const questionText = document.getElementById("questionText");
+      const optionsList = document.getElementById("optionsList");
+      const nextBtn = document.getElementById("nextBtn");
+      const summaryText = document.getElementById("summaryText");
+      const rankText = document.getElementById("rankText");
+      const timer = document.getElementById("timer");
+      const quizError = document.getElementById("quizError");
+      const resultPanel = document.getElementById("resultPanel");
+      const leaderboardList = document.getElementById("leaderboardList");
+      const adminForm = document.getElementById("adminForm");
+      const adminMessage = document.getElementById("adminMessage");
+      const testBankSummary = document.getElementById("testBankSummary");
+
+      const savedStudentName = sessionStorage.getItem("eduquizStudent");
+      if (savedStudentName) {
+        enterPlatform(savedStudentName);
+      }
+
+      let selectedSubject = "Ingliz tili";
+      subjectSelect.value = selectedSubject;
+      let currentIndex = 0;
+      let score = 0;
+      let answers = [];
+      let currentQuestions = [];
+      let timeLeft = 120;
+      let timerInterval = null;
+      let quizFinished = false;
+
+      const testData = {
+        "Ingliz tili": [
+          {
+            q: "What is the English translation of “kitob”?",
+            options: ["Book", "Pen", "Chair", "Table"],
+            answer: "Book",
+          },
+          {
+            q: "Choose the correct sentence.",
+            options: [
+              "She go to school.",
+              "She goes to school.",
+              "She going to school.",
+              "She gone to school.",
+            ],
+            answer: "She goes to school.",
+          },
+          {
+            q: "The opposite of “happy” is:",
+            options: ["Joyful", "Sad", "Bright", "Calm"],
+            answer: "Sad",
+          },
+          {
+            q: "Which word is a verb?",
+            options: ["Quick", "Run", "Blue", "Large"],
+            answer: "Run",
+          },
+          {
+            q: "I ___ a letter now.",
+            options: ["write", "writes", "am writing", "wrote"],
+            answer: "am writing",
+          },
+          {
+            q: "What is the plural of “child”?",
+            options: ["Childs", "Children", "Childes", "Childrens"],
+            answer: "Children",
+          },
+          {
+            q: "They ___ football every weekend.",
+            options: ["plays", "playing", "play", "played"],
+            answer: "play",
+          },
+          {
+            q: "Choose the correct past form of “go”.",
+            options: ["Goed", "Went", "Gone", "Going"],
+            answer: "Went",
+          },
+          {
+            q: "Which word means “olma”?",
+            options: ["Orange", "Apple", "Grape", "Peach"],
+            answer: "Apple",
+          },
+          {
+            q: "There ___ three books on the desk.",
+            options: ["is", "are", "was", "be"],
+            answer: "are",
+          },
+        ],
+        Matematika: [
+          {
+            q: "15 + 27 = ?",
+            options: ["32", "42", "40", "52"],
+            answer: "42",
+          },
+          {
+            q: "8 × 7 = ?",
+            options: ["54", "56", "58", "60"],
+            answer: "56",
+          },
+          {
+            q: "Yarimining 1/2 qismi 10 bo’lsa, butun soni qancha?",
+            options: ["5", "10", "20", "25"],
+            answer: "20",
+          },
+          {
+            q: "5² = ?",
+            options: ["10", "20", "25", "30"],
+            answer: "25",
+          },
+          {
+            q: "7 + 3 × 2 = ?",
+            options: ["13", "20", "17", "10"],
+            answer: "13",
+          },
+          {
+            q: "144 ning kvadrat ildizi nechaga teng?",
+            options: ["10", "11", "12", "14"],
+            answer: "12",
+          },
+          {
+            q: "3/4 ning o‘nli kasr ko‘rinishi qaysi?",
+            options: ["0.25", "0.5", "0.75", "1.25"],
+            answer: "0.75",
+          },
+          {
+            q: "Tomonlari 5 va 8 bo‘lgan to‘g‘ri to‘rtburchak yuzi qancha?",
+            options: ["13", "26", "40", "80"],
+            answer: "40",
+          },
+          {
+            q: "2x = 18 bo‘lsa, x nechaga teng?",
+            options: ["8", "9", "16", "20"],
+            answer: "9",
+          },
+          {
+            q: "1 kilometr necha metr?",
+            options: ["100", "500", "1000", "10000"],
+            answer: "1000",
+          },
+        ],
+        Tarix: [
+          {
+            q: "O‘zbekiston mustaqillikka erishgan yili qaysi yil?",
+            options: ["1990", "1991", "1992", "1995"],
+            answer: "1991",
+          },
+          {
+            q: "Amir Temur poytaxti qayer edi?",
+            options: ["Samarqand", "Toshkent", "Buxoro", "Xiva"],
+            answer: "Samarqand",
+          },
+          {
+            q: "Qadimgi Misr sivilizatsiyasi qaysi daryo bo‘yida shakllangan?",
+            options: ["Nil", "Dajla", "Volga", "Amudaryo"],
+            answer: "Nil",
+          },
+          {
+            q: "Birinchi Prezidentimiz kim edi?",
+            options: [
+              "Islom Karimov",
+              "Shavkat Mirziyoyev",
+              "Navoiy",
+              "A. Qodiriy",
+            ],
+            answer: "Islom Karimov",
+          },
+          {
+            q: "Sovet Ittifoqi qachon parchalanib ketdi?",
+            options: ["1990", "1991", "1992", "1989"],
+            answer: "1991",
+          },
+          {
+            q: "Alisher Navoiy qaysi asrda yashab ijod qilgan?",
+            options: ["XIII asr", "XIV asr", "XV asr", "XVI asr"],
+            answer: "XV asr",
+          },
+          {
+            q: "O‘zbekiston Respublikasining poytaxti qaysi shahar?",
+            options: ["Samarqand", "Buxoro", "Toshkent", "Xiva"],
+            answer: "Toshkent",
+          },
+          {
+            q: "Buyuk Ipak yo‘li asosan qaysi hududlarni bog‘lagan?",
+            options: [
+              "Sharq va G‘arbni",
+              "Shimol va Janubni",
+              "Afrika va Amerikani",
+              "Faqat orollarni",
+            ],
+            answer: "Sharq va G‘arbni",
+          },
+          {
+            q: "Amir Temur davlatining poytaxti qaysi shahar bo‘lgan?",
+            options: ["Toshkent", "Samarqand", "Qo‘qon", "Termiz"],
+            answer: "Samarqand",
+          },
+          {
+            q: "Rim imperiyasining markazi bo‘lgan shahar qaysi?",
+            options: ["Afina", "Rim", "Karfagen", "Iskandariya"],
+            answer: "Rim",
+          },
+        ],
+      };
+
+      function readStoredList(key) {
+        try {
+          const value = JSON.parse(localStorage.getItem(key) || "[]");
+          return Array.isArray(value) ? value : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function loadCustomQuestions() {
+        for (const question of readStoredList("eduquizCustomQuestions")) {
+          if (
+            testData[question.subject] &&
+            typeof question.q === "string" &&
+            Array.isArray(question.options) &&
+            question.options.length === 4 &&
+            question.options.includes(question.answer)
+          ) {
+            testData[question.subject].push(question);
+          }
+        }
+      }
+
+      function renderTestBankSummary() {
+        testBankSummary.replaceChildren();
+        for (const [subject, questions] of Object.entries(testData)) {
+          const card = document.createElement("div");
+          card.className = "result-card";
+          const title = document.createElement("h3");
+          title.textContent = subject;
+          const count = document.createElement("p");
+          count.textContent = `${questions.length} ta savol`;
+          card.append(title, count);
+          testBankSummary.append(card);
+        }
+      }
+
+      function renderLeaderboard() {
+        const scores = readStoredList("eduquizScores");
+        scores.sort(
+          (first, second) =>
+            second.score - first.score ||
+            second.correct - first.correct ||
+            first.completedAt - second.completedAt,
+        );
+        leaderboardList.replaceChildren();
+
+        if (!scores.length) {
+          const empty = document.createElement("p");
+          empty.className = "leaderboard-empty";
+          empty.textContent = "Hali test natijalari yo‘q.";
+          leaderboardList.append(empty);
+          return;
+        }
+
+        scores.slice(0, 10).forEach((entry, index) => {
+          const item = document.createElement("article");
+          item.className = "leader-item";
+          const rank = document.createElement("div");
+          rank.className = "rank";
+          rank.textContent = String(index + 1);
+          const name = document.createElement("h3");
+          name.textContent = entry.name;
+          const detail = document.createElement("p");
+          detail.textContent = `${entry.score}% • ${entry.subject} • ${entry.correct}/${entry.total}`;
+          item.append(rank, name, detail);
+          leaderboardList.append(item);
+        });
+      }
+
+      loadCustomQuestions();
+      renderTestBankSummary();
+      renderLeaderboard();
+
+      adminForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const options = [...adminForm.querySelectorAll(".answer-option")].map(
+          (input) => input.value.trim(),
+        );
+        const questionTextValue = document
+          .getElementById("adminQuestion")
+          .value.trim();
+
+        if (
+          !questionTextValue ||
+          options.some((option) => !option) ||
+          new Set(options.map((option) => option.toLocaleLowerCase())).size !==
+            4
+        ) {
+          adminMessage.textContent =
+            "Savol va takrorlanmaydigan 4 ta variant kiriting.";
+          return;
+        }
+
+        const question = {
+          subject: document.getElementById("adminSubject").value,
+          q: questionTextValue,
+          options,
+          answer:
+            options[
+              Number(document.getElementById("adminCorrectAnswer").value)
+            ],
+        };
+        const savedQuestions = readStoredList("eduquizCustomQuestions");
+        savedQuestions.push(question);
+        localStorage.setItem(
+          "eduquizCustomQuestions",
+          JSON.stringify(savedQuestions),
+        );
+        testData[question.subject].push(question);
+        adminForm.reset();
+        adminMessage.textContent =
+          "Savol saqlandi va testlar bankiga qo‘shildi.";
+        renderTestBankSummary();
+      });
+
+      function shuffleItems(items) {
+        for (let index = items.length - 1; index > 0; index--) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
+        }
+        return items;
+      }
+
+      function createQuizQuestions(subject) {
+        const pool = testData[subject].map((question) => ({
+          ...question,
+          options: [...question.options],
+        }));
+        shuffleItems(pool);
+
+        const questions = pool.slice(0, 5);
+        const selectionKey = `eduquizQuestionSet:${subject}`;
+        const selectionSignature = questions
+          .map((question) => question.q)
+          .sort()
+          .join("||");
+
+        if (selectionSignature === sessionStorage.getItem(selectionKey)) {
+          const replacement = pool.find(
+            (question) => !questions.some((item) => item.q === question.q),
+          );
+          questions[questions.length - 1] = replacement;
+        }
+
+        sessionStorage.setItem(
+          selectionKey,
+          questions
+            .map((question) => question.q)
+            .sort()
+            .join("||"),
+        );
+
+        shuffleItems(questions);
+        questions.forEach((question) => shuffleItems(question.options));
+        return questions;
+      }
+
+      subjectCards.forEach((card) => {
+        card.addEventListener("click", () => {
+          subjectCards.forEach((c) => c.classList.remove("selected"));
+          card.classList.add("selected");
+          selectedSubject = card.dataset.subject;
+          subjectSelect.value = selectedSubject;
+        });
+      });
+
+      subjectSelect.addEventListener("change", (e) => {
+        selectedSubject = e.target.value;
+        subjectCards.forEach((card) => {
+          card.classList.toggle(
+            "selected",
+            card.dataset.subject === selectedSubject,
+          );
+        });
+      });
+
+      function startTimer() {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          const minutes = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+          const seconds = String(timeLeft % 60).padStart(2, "0");
+          timer.textContent = `${minutes}:${seconds}`;
+
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishTest();
+          }
+        }, 1000);
+      }
+
+      function renderQuestion() {
+        const q = currentQuestions[currentIndex];
+        quizTitle.textContent = `${selectedSubject} testi`;
+        questionText.textContent = `${currentIndex + 1}. ${q.q}`;
+        optionsList.innerHTML = "";
+        quizError.textContent = "";
+
+        q.options.forEach((option) => {
+          const btn = document.createElement("button");
+          btn.className = "option";
+          btn.textContent = option;
+          btn.type = "button";
+
+          btn.addEventListener("click", () => {
+            answers[currentIndex] = option;
+            document
+              .querySelectorAll(".option")
+              .forEach((item) => item.classList.remove("selected"));
+            btn.classList.add("selected");
+          });
+
+          optionsList.appendChild(btn);
+        });
+
+        const progress = `${currentIndex + 1}/${currentQuestions.length}`;
+        document.getElementById("progressText").textContent =
+          `Savol ${progress}`;
+      }
+
+      function finishTest() {
+        if (quizFinished) return;
+        quizFinished = true;
+        clearInterval(timerInterval);
+
+        let correct = 0;
+
+        currentQuestions.forEach((q, i) => {
+          if (answers[i] === q.answer) correct++;
+        });
+
+        score = Math.round((correct / currentQuestions.length) * 100);
+        summaryText.textContent = `${studentName.value || "O’quvchi"}: ${score}% (${correct}/${currentQuestions.length})`;
+        rankText.textContent =
+          score >= 80
+            ? "Siz yuqori reytingga kirdingiz!"
+            : "Yana bir oz ishlashingiz kerak.";
+        quizSection.classList.add("hidden");
+        document.getElementById("resultName").textContent = studentName.value;
+        document.getElementById("resultSummary").textContent =
+          `${selectedSubject} bo‘yicha ${score}% (${correct}/${currentQuestions.length}) natija oldingiz.`;
+        resultPanel.classList.remove("hidden");
+
+        const scores = readStoredList("eduquizScores");
+        scores.push({
+          name: studentName.value.trim(),
+          subject: selectedSubject,
+          score,
+          correct,
+          total: currentQuestions.length,
+          completedAt: Date.now(),
+        });
+        localStorage.setItem("eduquizScores", JSON.stringify(scores));
+        renderLeaderboard();
+      }
+
+      startTestBtn.addEventListener("click", () => {
+        if (!studentName.value.trim()) {
+          alert("Ismingizni kiriting!");
+          return;
+        }
+
+        if (!subjectSelect.value || !testData[selectedSubject]) {
+          alert("Fan tanlang!");
+          return;
+        }
+
+        resultPanel.classList.add("hidden");
+        quizSection.classList.remove("hidden");
+        currentIndex = 0;
+        score = 0;
+        answers = [];
+        currentQuestions = createQuizQuestions(selectedSubject);
+        quizFinished = false;
+        timeLeft = 120;
+        startTimer();
+        renderQuestion();
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (answers[currentIndex] === undefined) {
+          quizError.textContent = "Davom etish uchun javob variantini tanlang.";
+          return;
+        }
+
+        if (currentIndex < currentQuestions.length - 1) {
+          currentIndex++;
+          renderQuestion();
+        } else {
+          finishTest();
+        }
+      });
+    </script>
+  </body>
+</html>
